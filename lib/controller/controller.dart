@@ -1,12 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:google_calendar_synchronize/const/const_key.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CalendarController {
-  static const _scopes = ["https://www.googleapis.com/auth/calendar"];
+  static const _scopes = [scopeUrl];
   static var credentials;
 
   static Event event = Event();
@@ -16,11 +17,11 @@ class CalendarController {
   static void createClientId() {
     if (Platform.isAndroid) {
       credentials = ClientId(
-          "957984339321-5v211cci6sb4focih7eio7ogjqndligf.apps.googleusercontent.com",
+          client_credential_key,
           "");
     } else if (Platform.isIOS) {
       credentials = ClientId(
-          "957984339321-5v211cci6sb4focih7eio7ogjqndligf.apps.googleusercontent.com",
+          client_credential_key,
           "");
     }
   }
@@ -32,11 +33,11 @@ class CalendarController {
 
     //Setting start time
     start.dateTime = startTime;
-    start.timeZone = "GMT+05:00";
+    start.timeZone = "GMT+07:00";
     event.start = start;
 
     //setting end time
-    end.timeZone = "GMT+05:00";
+    end.timeZone = "GMT+07:00";
     end.dateTime = endTime;
     event.end = end;
   }
