@@ -1,14 +1,16 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:google_calendar_synchronize/const/const_key.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CalendarController {
-  static const _scopes = [scopeUrl];
+  static const scopes = [scopeUrl];
   static var credentials;
+  static AuthClient? client;
 
   static Event event = Event();
   static EventDateTime end = EventDateTime();
@@ -16,13 +18,9 @@ class CalendarController {
 
   static void createClientId() {
     if (Platform.isAndroid) {
-      credentials = ClientId(
-          client_credential_key,
-          "");
+      credentials = ClientId(client_credential_key, "");
     } else if (Platform.isIOS) {
-      credentials = ClientId(
-          client_credential_key,
-          "");
+      credentials = ClientId(client_credential_key, "");
     }
   }
 
@@ -44,22 +42,31 @@ class CalendarController {
 
   static insertEvent(event) {
     try {
-      clientViaUserConsent(credentials, _scopes, prompt)
-          .then((AuthClient client) {
-        var calendar = CalendarApi(client);
-        String calendarId = "primary";
-        calendar.events.insert(event, calendarId).then((value) {
-          print("ADDEDDD_________________${value.status}");
-          if (value.status == "confirmed") {
-            log('Event added in google calendar');
-          } else {
-            log("Unable to add event in google calendar");
-          }
-        });
+      var calendar = CalendarApi(client as dynamic);
+      String calendarId = "primary";
+      calendar.events.insert(event, calendarId).then((value) {
+        print("ADDEDDD_________________${value.status}");
+        if (value.status == "confirmed") {
+          log('Event added in google calendar');
+        } else {
+          log("Unable to add event in google calendar");
+        }
       });
     } catch (e) {
       log('Error creating event $e');
     }
+  }
+
+  static loginWithGoogle(BuildContext context) {
+    createClientId();
+    try {
+      clientViaUserConsent(credentials, scopes, prompt)
+          .then((AuthClient authClient) {
+        client = authClient;
+        Navigator.pushReplacementNamed(context, "/home");
+      });
+      print("login success");
+    } catch (e) {}
   }
 
   static void prompt(String url) async {

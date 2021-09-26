@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_calendar_synchronize/pages/home.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_calendar_synchronize/routes/on_generated_routes.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -10,12 +11,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      initialRoute: "/login",
+      onGenerateRoute: (settings) {
+        return GeneratedRoutes.generate(settings);
+      },
+      onUnknownRoute: (settings) {
+        return GeneratedRoutes.onUnknownRoutes();
+      },
     );
   }
 }
