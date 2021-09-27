@@ -1,16 +1,19 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_calendar_synchronize/const/const_key.dart';
+import 'package:google_calendar_synchronize/model/user_profile.dart';
 import 'package:googleapis/calendar/v3.dart';
-import 'package:googleapis_auth/auth_io.dart';
+import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:url_launcher/url_launcher.dart';
 
 class CalendarController {
-  static const scopes = [scopeUrl];
+  static const scopes = [calendarScope, authProfileScope];
   static var credentials;
-  static AuthClient? client;
+  static auth.AuthClient? client;
+  static UserFromGoogle? currentUser;
 
   static Event event = Event();
   static EventDateTime end = EventDateTime();
@@ -18,9 +21,9 @@ class CalendarController {
 
   static void createClientId() {
     if (Platform.isAndroid) {
-      credentials = ClientId(client_credential_key, "");
+      credentials = auth.ClientId(client_credential_key, "");
     } else if (Platform.isIOS) {
-      credentials = ClientId(client_credential_key, "");
+      credentials = auth.ClientId(client_credential_key, "");
     }
   }
 
@@ -60,13 +63,31 @@ class CalendarController {
   static loginWithGoogle(BuildContext context) {
     createClientId();
     try {
-      clientViaUserConsent(credentials, scopes, prompt)
-          .then((AuthClient authClient) {
+      auth
+          .clientViaUserConsent(credentials, scopes, prompt)
+          .then((auth.AuthClient authClient) async {
+        currentUser = await getGoogleUserData(authClient);
         client = authClient;
+
+        log("LOGIN SUCCESS");
+
         Navigator.pushReplacementNamed(context, "/home");
       });
-      print("login success");
-    } catch (e) {}
+    } catch (e) {
+      log("LOGIN FAILED");
+    }
+  }
+
+  static getGoogleUserData(auth.AuthClient authClient) async {
+    final response = await authClient.get(
+        Uri.parse("https://www.googleapis.com/oauth2/v1/userinfo?alt=json"),
+        headers: {
+          "Authorization": authClient.credentials.accessToken.toString()
+        });
+
+    var jsonData = jsonDecode(response.body);
+    log("res : ${jsonData}");
+    return UserFromGoogle.fromJson(jsonData);
   }
 
   static void prompt(String url) async {

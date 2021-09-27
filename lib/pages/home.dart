@@ -13,9 +13,25 @@ class HomePage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            
+            ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: CalendarController.currentUser == null
+                  ? Icon(Icons.person)
+                  : Image.network(
+                      CalendarController.currentUser!.picture as dynamic),
+            ),
+            Text(
+              CalendarController.currentUser == null
+                  ? "User2876534"
+                  : CalendarController.currentUser!.name as dynamic,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              height: 50,
+            ),
             TextField(
               controller: titleEditingController,
             ),
@@ -47,9 +63,10 @@ class HomePage extends StatelessWidget {
                 onPressed: () {
                   CalendarController.createClientId();
                   CalendarController.createEventObject(
-                      summaryText: titleEditingController.text,
-                      startTime:startDateTime,
-                      endTime: endDateTime,);
+                    summaryText: titleEditingController.text,
+                    startTime: startDateTime,
+                    endTime: endDateTime,
+                  );
                   CalendarController.insertEvent(CalendarController.event);
                 },
                 child: Text("Add"))
@@ -57,6 +74,5 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
- 
   }
 }
